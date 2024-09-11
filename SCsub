@@ -1,0 +1,17 @@
+# SCsub
+
+Import('env')
+Import("env_modules")
+
+env_adplug = env_modules.Clone()
+env_adplug.add_source_files(env.modules_sources, "*.cpp") # Add all cpp files to the build
+
+env_adplug.Append(CPPPATH=["adplug/libbinio1.5/include/libbinio", "adplug/adplug2.3.3/include"])
+
+
+env.Append(LIBPATH=["adplug/libbinio1.5/lib", "adplug/adplug2.3.3/lib"])
+
+if env.msvc:
+    env.Append(LIBS=[File("adplug/libbinio1.5/lib/libbinio.lib"), File("adplug/adplug2.3.3/lib/adplug.lib")])
+else:
+    env.Append(LIBS=["libbinio", "adplug"])
