@@ -14,8 +14,11 @@ export_presets.cfg
 data_*/
 mono_crash.*.json
 
+# Module gitignore
 *.obj
+_pycache_/
+
+# Ignore Adplug libraries
 adplug/
 libbinio/
-Source/
-_pycache_/
+Source/ # Just for me don't worry about this, you shouldn't have a Source folder.
