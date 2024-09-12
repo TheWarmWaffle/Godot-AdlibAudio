@@ -24,10 +24,9 @@ void AudioStreamPlaybackAdlib::stop() {
 	base->reset();
 }
 void AudioStreamPlaybackAdlib::start(double p_from_pos) {
-	print_line(base->filename);
 	CEmuopl opl(RATE, BIT16, base->stereo);
 	opl.settype(static_cast<Copl::ChipType>(base->get_chipset()));
-	String GlobalFilePath = ProjectSettings::get_singleton()->globalize_path(base->filename);
+	String GlobalFilePath = ProjectSettings::get_singleton()->globalize_path(base->file_path);
 	const char *char_path = GlobalFilePath.utf8();
 	CPlayer* playback = CAdPlug::factory(char_path, &opl);
 	if (!playback) {
@@ -46,7 +45,7 @@ void AudioStreamPlaybackAdlib::start(double p_from_pos) {
 			}
 		}
 	reverse(playback_data.begin(), playback_data.end());
-	print_line(playback_data.size());
+	// print_line(playback_data.size());
 	active = true;
 }
 void AudioStreamPlaybackAdlib::seek(double p_time) {

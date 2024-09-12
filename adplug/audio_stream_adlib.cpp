@@ -6,19 +6,10 @@
 AudioStreamAdlib::AudioStreamAdlib() : mix_rate(44100), stereo(false), hz(639) {
 }
 
-void AudioStreamAdlib::set_file_path(String _filename) {
-	filename = _filename;
-	// print_line("AAA FILENAME: ", filename);
-}
-
 Ref<AudioStreamPlayback> AudioStreamAdlib::instantiate_playback() {
-	print_line("Here");
 	Ref<AudioStreamPlaybackAdlib> playback;
-	print_line("Here1");
 	playback.instantiate();
-	print_line("Here2");
 	playback->base = Ref<AudioStreamAdlib>(this);
-	print_line("Here3");
 	return playback;
 }
 
@@ -49,6 +40,14 @@ AudioStreamAdlib::ChipType AudioStreamAdlib::get_chipset() {
 	return chipset;
 }
 
+void AudioStreamAdlib::set_file_path(const String p_path) {
+	file_path = p_path;
+}
+
+String AudioStreamAdlib::get_file_path() {
+	return file_path;
+}
+
 void AudioStreamAdlib::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("reset"), &AudioStreamAdlib::reset);
 	ClassDB::bind_method(D_METHOD("get_stream_name"), &AudioStreamAdlib::get_stream_name);
@@ -59,9 +58,13 @@ void AudioStreamAdlib::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_chipset", "chip_type"), &AudioStreamAdlib::set_chipset);
 	ClassDB::bind_method(D_METHOD("get_chipset"), &AudioStreamAdlib::get_chipset);
-	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "chipset"), "set_chipset", "get_chipset");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "chipset", PROPERTY_HINT_ENUM, "OPL2,DUAL OPL2,OPL3,AUTO"), "set_chipset", "get_chipset");
 	
+	ClassDB::bind_method(D_METHOD("set_file_path", "path"), &AudioStreamAdlib::set_file_path);
+	ClassDB::bind_method(D_METHOD("get_file_path"), &AudioStreamAdlib::get_file_path);
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "file_path"), "set_file_path", "get_file_path");
 	BIND_ENUM_CONSTANT(TYPE_OPL2);
 	BIND_ENUM_CONSTANT(TYPE_DUAL_OPL2);
 	BIND_ENUM_CONSTANT(TYPE_OPL3);
+	BIND_ENUM_CONSTANT(TYPE_AUTO);
 }

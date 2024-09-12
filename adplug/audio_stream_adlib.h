@@ -15,23 +15,27 @@
 class AudioStreamAdlib : public AudioStream {
 	GDCLASS(AudioStreamAdlib, AudioStream);
 	OBJ_SAVE_TYPE(AudioStream); // Saves derived classes with common type so they can be interchanged.
+	RES_BASE_EXTENSION("adplugstr");
 	friend class AudioStreamPlaybackAdlib;
 public:
 	enum ChipType {
 		TYPE_OPL2 = 0,
 		TYPE_DUAL_OPL2 = 1,
-		TYPE_OPL3 = 2
+		TYPE_OPL3 = 2,
+		TYPE_AUTO = 3 // Even though it's defualt make it 4, so the other enum's correspond to Copl's ChipType.
 	};
-	void set_chipset(ChipType p_type);
-	ChipType get_chipset();
 	void set_loop(bool p_enable);
 	virtual bool has_loop() const;
+	void set_chipset(ChipType p_type);
+	ChipType get_chipset();
+	void set_file_path(const String p_path);
+	String get_file_path();
 	
 	void reset();
 	void set_position(uint64_t pos);
 	virtual Ref<AudioStreamPlayback> instantiate_playback();
 	virtual String get_stream_name() const;
-	void set_file_path(String _filename);
+
 	virtual double get_length() const { return 0; } // if supported, otherwise return 0
 	virtual bool can_be_sampled() const override {
 		return false;
@@ -41,10 +45,10 @@ private:
 	uint64_t pos;
 	int mix_rate;
 	int hz;
-	bool loop = false;
 	bool stereo = false;
-	ChipType chipset = TYPE_OPL2;
-	String filename;
+	bool loop = false;
+	ChipType chipset = TYPE_AUTO;
+	String file_path = "DEFUALT";
 protected:
 	static void _bind_methods();
 };
