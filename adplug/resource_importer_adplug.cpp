@@ -144,7 +144,7 @@ Error ResourceImporterAdplug::import(const String &p_source_file, const String &
 	adlib_stream->set_loop(loop);
 	adlib_stream->set_chipset(static_cast<AudioStreamAdlib::ChipType>(chipset));
 	adlib_stream->set_file_path(String(p_source_file));
-	print_line("Import: ", p_source_file);
+	// print_line("Import: ", p_source_file);
 	// adlib_stream->set_loop_offset(loop_offset);
 	// adlib_stream->set_bpm(bpm);
 	// adlib_stream->set_beat_count(beat_count);
