@@ -1,12 +1,12 @@
 # Godot-AdlibAudio
 A Godot module that uses Adplug to emulate OPL2 music.
 
-## Dependecies:
+## Dependecies
 Adplug v2.3.3 and Libbinio v1.5, Those are the only versions it's been tested with, but you can try later ones.
 make sure to compile the Adplug and Libbinio dependecies for the architecture you're compiling godot, if it's x86_64, make sure the libraries are also x86_64.
 Also this is only tested on x86_64 windows.
 
-## Instructions:
+## Instructions
 First off you can place the svg file in editor/icons of your custom compiled Godot folder, so there will be an icon for the AudioStreamAdlib class.
 download the "adplug" folder from this repo and place it in modules.
 in "modules/adplug/" place your adplug folder and your libbinio folder.
