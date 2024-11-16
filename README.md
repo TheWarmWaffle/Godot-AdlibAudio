@@ -14,3 +14,6 @@ You can also look at the SCsub file for more details on where the libraries and 
 
 ## Important
 Finally, you will have to manually go into the "adplug_loader.cpp", in the get_recognized_extensions function, comment out the extensions you aren't gonna use and comment back in the ones you are gonna use. because unfortanetly godot limits the number of recognized extensions to a certain amount (I'm not sure what exactly).
+
+## Known issues
+Dual Opl2 doesn't work yet, at all.
