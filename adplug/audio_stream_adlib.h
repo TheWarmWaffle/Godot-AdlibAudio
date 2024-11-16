@@ -20,8 +20,8 @@ class AudioStreamAdlib : public AudioStream {
 public:
 	enum ChipType {
 		TYPE_OPL2 = 0,
-		TYPE_DUAL_OPL2 = 1,
-		TYPE_OPL3 = 2,
+		TYPE_OPL3 = 1,
+		TYPE_DUAL_OPL2 = 2,
 		TYPE_AUTO = 3 // Even though it's defualt make it 4, so the other enum's correspond to Copl's ChipType.
 	};
 	void set_loop(bool p_enable);

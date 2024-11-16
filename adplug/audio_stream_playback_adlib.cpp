@@ -12,9 +12,9 @@
 // Adplug definitions:
 #include <adplug/adplug.h>
 #include <adplug/emuopl.h>
+#include <adplug/nemuopl.h>
 
 using namespace std;
-
 
 AudioStreamPlaybackAdlib::~AudioStreamPlaybackAdlib() {
 }
@@ -24,30 +24,45 @@ void AudioStreamPlaybackAdlib::stop() {
 	base->reset();
 }
 void AudioStreamPlaybackAdlib::start(double p_from_pos) {
-	CEmuopl opl(RATE, BIT16, base->stereo);
-	opl.settype(static_cast<Copl::ChipType>(base->get_chipset()));
+	Copl::ChipType copl_chip_type = static_cast<Copl::ChipType>(base->get_chipset());
+	Copl *opl;
+	short buf[BUFSIZE];
+	unsigned long towrite, write, write_buffer_size;
+	short write_multiplier = 1;
+	cout << copl_chip_type << " " << base->get_chipset() << "\n";
+	if (copl_chip_type == Copl::TYPE_OPL3) { // Opl3, Nuked.
+		opl = new CNemuopl(RATE);
+		write_buffer_size = BUFSIZE/2; // For Stereo Audio.
+		write_multiplier = 2;
+		base->stereo = true;
+	}
+	else { // Opl2
+		base->stereo = false;
+		opl = new CEmuopl(RATE, BIT16, false);
+		// opl->settype(copl_chip_type);
+		write_buffer_size = BUFSIZE;
+	}
+	
 	String GlobalFilePath = ProjectSettings::get_singleton()->globalize_path(base->file_path);
 	const char *char_path = GlobalFilePath.utf8();
-	CPlayer* playback = CAdPlug::factory(char_path, &opl);
+	CPlayer* playback = CAdPlug::factory(char_path, &*opl);
 	if (!playback) {
 		print_error("Can't load Adplug file");
 		stop();
 		return;
 	}
-	short buf[BUFSIZE];
-	unsigned long towrite, write;
 	while(playback->update())
 		for (towrite = RATE / playback->getrefresh(); towrite; towrite -= write) {
-			write = (towrite > BUFSIZE ? BUFSIZE : towrite);
-			opl.update(buf, write);
-			for (unsigned int buf_index = 0; buf_index < write; buf_index++) {
+			write = (towrite > write_buffer_size ? write_buffer_size : towrite);
+			opl->update(buf, write);
+			for (unsigned int buf_index = 0; buf_index < write * write_multiplier; buf_index++) {
 				playback_data.push_back(buf[buf_index]);
 			}
 		}
 	reverse(playback_data.begin(), playback_data.end());
-	// print_line(playback_data.size());
 	active = true;
 }
+
 void AudioStreamPlaybackAdlib::seek(double p_time) {
 	if (p_time < 0) {
 		p_time = 0;
@@ -71,12 +86,13 @@ int AudioStreamPlaybackAdlib::mix(AudioFrame *p_buffer, float p_rate_scale, int 
 		for (int i = 0; i < towrite; i+=2) {
 			float sample1 = float(playback_data[playback_data_size-1-i]) / 32767.0;
 			float sample2 = float(playback_data[playback_data_size-1-(i+1)]) / 32767.0;
-			p_buffer[i] = AudioFrame(sample1, sample2);
+			p_buffer[i/2] = AudioFrame(sample1, sample2);
 		}
 		if (playback_data_size <= p_frames*2) {
 			stop();
 		}
 		playback_data.resize(playback_data_size-towrite);
+		return towrite/2;
 	}
 	else {
 		if (playback_data_size <= p_frames) {
@@ -90,8 +106,8 @@ int AudioStreamPlaybackAdlib::mix(AudioFrame *p_buffer, float p_rate_scale, int 
 			stop();
 		}
 		playback_data.resize(playback_data_size-towrite);
+		return towrite;
 	}
-	return towrite;
 }
 
 int AudioStreamPlaybackAdlib::get_loop_count() const {

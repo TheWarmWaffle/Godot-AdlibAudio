@@ -58,7 +58,7 @@ void AudioStreamAdlib::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("set_chipset", "chip_type"), &AudioStreamAdlib::set_chipset);
 	ClassDB::bind_method(D_METHOD("get_chipset"), &AudioStreamAdlib::get_chipset);
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "chipset", PROPERTY_HINT_ENUM, "OPL2,DUAL OPL2,OPL3,AUTO"), "set_chipset", "get_chipset");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "chipset", PROPERTY_HINT_ENUM, "OPL2,OPL3,DUAL OPL2,AUTO"), "set_chipset", "get_chipset");
 	
 	ClassDB::bind_method(D_METHOD("set_file_path", "path"), &AudioStreamAdlib::set_file_path);
 	ClassDB::bind_method(D_METHOD("get_file_path"), &AudioStreamAdlib::get_file_path);
