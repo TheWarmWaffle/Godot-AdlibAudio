@@ -32,8 +32,7 @@ void make_stereo() {
 	stereo = true;
 }
 
-AudioStreamPlaybackAdlib::~AudioStreamPlaybackAdlib() {
-}
+AudioStreamPlaybackAdlib::~AudioStreamPlaybackAdlib() {}
 
 void AudioStreamPlaybackAdlib::stop() {
 	// active = false;
@@ -45,14 +44,11 @@ void AudioStreamPlaybackAdlib::start(double p_from_pos) {
 	Copl *opl;
 	short buf[BUFSIZE];
 	unsigned long towrite, write;
-	
 	if (base->emulator == AudioStreamAdlib::NUKED) { // Opl3, Recommended.
 		opl = new CNemuopl(RATE);
 		make_stereo();
 	}
-	if (base->emulator == AudioStreamAdlib::ADPLUG) { // Opl2, Dual Opl2, Opl3.
-		cout << "made it se\n";
-		
+	else { // elif (base->emulator == AudioStreamAdlib::ADPLUG) { // Opl2, Dual Opl2, Opl3.
 		if (copl_chip_type == Copl::TYPE_DUAL_OPL2 || copl_chip_type == Copl::TYPE_OPL3) {
 			CEmuopl *new_opl = new CEmuopl(RATE, BIT16, false); // Need to have a throwoway variable, so we can properly access settype().
 			new_opl->settype(copl_chip_type);
@@ -65,10 +61,7 @@ void AudioStreamPlaybackAdlib::start(double p_from_pos) {
 			opl = new_opl;
 			make_mono();
 		}
-		
-		cout << "A\n";
 	}
-	
 	String GlobalFilePath = ProjectSettings::get_singleton()->globalize_path(base->file_path);
 	const char *char_path = GlobalFilePath.utf8();
 	CPlayer* playback = CAdPlug::factory(char_path, &*opl);
@@ -77,7 +70,6 @@ void AudioStreamPlaybackAdlib::start(double p_from_pos) {
 		stop();
 		return;
 	}
-	cout << "Made it here\n";
 	while(playback->update())
 		for (towrite = RATE / playback->getrefresh(); towrite; towrite -= write) {
 			write = (towrite > write_buffer_size ? write_buffer_size : towrite);
@@ -86,7 +78,6 @@ void AudioStreamPlaybackAdlib::start(double p_from_pos) {
 				playback_data.push_back(buf[buf_index]);
 			}
 		}
-	cout << "making it here\n";
 	reverse(playback_data.begin(), playback_data.end());
 	active = true;
 }

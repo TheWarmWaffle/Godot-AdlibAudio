@@ -16,6 +16,8 @@
 // #include <ogg/ogg.h>
 // #include <vorbis/codec.h>
 
+using namespace std;
+
 String ResourceImporterAdplug::get_importer_name() const {
 	return "adplugstr";
 }
@@ -104,7 +106,7 @@ String ResourceImporterAdplug::get_preset_name(int p_idx) const {
 
 void ResourceImporterAdplug::get_import_options(const String &p_path, List<ImportOption> *r_options, int p_preset) const {
 	r_options->push_back(ImportOption(PropertyInfo(Variant::BOOL, "loop"), false));
-	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "emulator", PROPERTY_HINT_ENUM, "NUKED,ADPLUG"), 2));
+	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "emulator", PROPERTY_HINT_ENUM, "NUKED,ADPLUG"), 0));
 	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "chipset", PROPERTY_HINT_ENUM, "OPL2,OPL3,DUAL OPL2,AUTO"), 3));
 }
 
@@ -123,7 +125,7 @@ void ResourceImporterAdplug::show_advanced_options(const String &p_path) {
 }
 #endif
 
-Error ResourceImporterAdplug::import(const String &p_source_file, const String &p_save_path, const HashMap<StringName, Variant> &p_options, List<String> *r_platform_variants, List<String> *r_gen_files, Variant *r_metadata) {
+Error ResourceImporterAdplug::import(ResourceUID::ID p_source_id, const String &p_source_file, const String &p_save_path, const HashMap<StringName, Variant> &p_options, List<String> *r_platform_variants, List<String> *r_gen_files, Variant *r_metadata) {
 	bool loop = p_options["loop"];
 	int chipset = p_options["chipset"];
 	int emulator = p_options["emulator"];
