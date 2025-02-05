@@ -45,7 +45,6 @@ void AudioStreamPlaybackAdlib::start(double p_from_pos) {
 		}
 	}
 	String GlobalFilePath = ProjectSettings::get_singleton()->globalize_path(base->file_path);
-	print_line(GlobalFilePath);
 	const char *char_path = GlobalFilePath.utf8();
 	playback = CAdPlug::factory(char_path, &*opl);
 	if (!playback) {
@@ -62,7 +61,6 @@ void AudioStreamPlaybackAdlib::seek(double p_time) {
 	if (p_time < 0) {
 		p_time = 0;
 	}
-	print_line("Adplug, Seek");
 	playback->seek(unsigned long(p_time*1000));
 	towrite = RATE / playback->getrefresh();
 	// if (!playback->update()) {
