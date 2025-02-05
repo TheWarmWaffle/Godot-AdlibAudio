@@ -17,13 +17,6 @@ String AudioStreamAdlib::get_stream_name() const {
 	return "";
 }
 
-void AudioStreamAdlib::reset() {
-	set_position(0);
-}
-void AudioStreamAdlib::set_position(uint64_t p) {
-	pos = p;
-}
-
 void AudioStreamAdlib::set_loop(bool p_enable) {
 	loop = p_enable;
 }
@@ -57,7 +50,6 @@ String AudioStreamAdlib::get_file_path() {
 }
 
 void AudioStreamAdlib::_bind_methods() {
-	ClassDB::bind_method(D_METHOD("reset"), &AudioStreamAdlib::reset);
 	ClassDB::bind_method(D_METHOD("get_stream_name"), &AudioStreamAdlib::get_stream_name);
 	
 	ClassDB::bind_method(D_METHOD("set_loop", "enable"), &AudioStreamAdlib::set_loop);

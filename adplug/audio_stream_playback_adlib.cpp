@@ -16,69 +16,45 @@
 
 using namespace std;
 
-unsigned long write_buffer_size = BUFSIZE; // BUFSIZE for mono, BUFSIZE/2 for stereo.
-short write_multiplier = 1; // 1 for mono, 2 for stero.
-bool stereo = false;
-
-void make_mono() {
-	write_buffer_size = BUFSIZE;
-	write_multiplier = 1;
-	stereo = false;
-}
-
-void make_stereo() {
-	write_buffer_size = BUFSIZE/2;
-	write_multiplier = 2;
-	stereo = true;
-}
-
 AudioStreamPlaybackAdlib::~AudioStreamPlaybackAdlib() {}
 
 void AudioStreamPlaybackAdlib::stop() {
-	// active = false;
-	base->reset();
+	active = false;
+	towrite = 0;
 }
 
 void AudioStreamPlaybackAdlib::start(double p_from_pos) {
 	Copl::ChipType copl_chip_type = static_cast<Copl::ChipType>(base->get_chipset());
-	Copl *opl;
-	short buf[BUFSIZE];
-	unsigned long towrite, write;
+
 	if (base->emulator == AudioStreamAdlib::NUKED) { // Opl3, Recommended.
 		opl = new CNemuopl(RATE);
-		make_stereo();
+		stereo = true;
 	}
 	else { // elif (base->emulator == AudioStreamAdlib::ADPLUG) { // Opl2, Dual Opl2, Opl3.
 		if (copl_chip_type == Copl::TYPE_DUAL_OPL2 || copl_chip_type == Copl::TYPE_OPL3) {
 			CEmuopl *new_opl = new CEmuopl(RATE, BIT16, false); // Need to have a throwoway variable, so we can properly access settype().
 			new_opl->settype(copl_chip_type);
 			opl = new_opl;
-			make_mono();
+			stereo = true;
 		}
 		else {
 			CEmuopl *new_opl = new CEmuopl(RATE, BIT16, false); // Need to have a throwoway variable, so we can properly access settype().
 			new_opl->settype(copl_chip_type);
 			opl = new_opl;
-			make_mono();
+			stereo = false;
 		}
 	}
 	String GlobalFilePath = ProjectSettings::get_singleton()->globalize_path(base->file_path);
+	print_line(GlobalFilePath);
 	const char *char_path = GlobalFilePath.utf8();
-	CPlayer* playback = CAdPlug::factory(char_path, &*opl);
+	playback = CAdPlug::factory(char_path, &*opl);
 	if (!playback) {
 		print_error("Can't load Adplug file!");
 		stop();
 		return;
 	}
-	while(playback->update())
-		for (towrite = RATE / playback->getrefresh(); towrite; towrite -= write) {
-			write = (towrite > write_buffer_size ? write_buffer_size : towrite);
-			opl->update(buf, write);
-			for (unsigned int buf_index = 0; buf_index < write * write_multiplier; buf_index++) {
-				playback_data.push_back(buf[buf_index]);
-			}
-		}
-	reverse(playback_data.begin(), playback_data.end());
+	playback->seek(unsigned long(p_from_pos*1000));
+	towrite = RATE / playback->getrefresh();
 	active = true;
 }
 
@@ -86,46 +62,65 @@ void AudioStreamPlaybackAdlib::seek(double p_time) {
 	if (p_time < 0) {
 		p_time = 0;
 	}
-	p_time = 0;
-	// base->set_position(uint64_t(p_time * base->mix_rate) << MIX_FRAC_BITS);
+	print_line("Adplug, Seek");
+	playback->seek(unsigned long(p_time*1000));
+	towrite = RATE / playback->getrefresh();
+	// if (!playback->update()) {
+		// stop();
+	// }
 }
+
 
 int AudioStreamPlaybackAdlib::mix(AudioFrame *p_buffer, float p_rate_scale, int p_frames) {
 	if (!active) {
 		stop();
 		return 0;
 	}
-	int towrite = p_frames;
-	int playback_data_size = playback_data.size();
+	
 	if (stereo == true) {
-		towrite = p_frames*2;
-		if (playback_data_size <= p_frames*2) {
-			towrite = playback_data_size;
+		short buf[STEREO_BUFSIZE];
+		unsigned long write;
+		write = BUFSIZE;
+		opl->update(buf, write);
+		
+		for (unsigned int buf_index = 0; buf_index < STEREO_BUFSIZE; buf_index+=2) {
+			float sample1 = float(buf[buf_index]) / BIT16_TO_FLOAT;
+			float sample2 = float(buf[buf_index+1]) / BIT16_TO_FLOAT;
+			p_buffer[buf_index/2] = AudioFrame(sample1, sample2);
 		}
-		for (int i = 0; i < towrite; i+=2) {
-			float sample1 = float(playback_data[playback_data_size-1-i]) / 32767.0;
-			float sample2 = float(playback_data[playback_data_size-1-(i+1)]) / 32767.0;
-			p_buffer[i/2] = AudioFrame(sample1, sample2);
+		
+		if (towrite > BUFSIZE) {
+			towrite -= write;
 		}
-		if (playback_data_size <= p_frames*2) {
-			stop();
+		else {
+			towrite = RATE / playback->getrefresh();
+			if (!playback->update()) {
+				stop();
+				return 0;
+			}
 		}
-		playback_data.resize(playback_data_size-towrite);
-		return towrite/2;
+		return p_frames;
 	}
 	else {
-		if (playback_data_size <= p_frames) {
-			towrite = playback_data_size;
+		short buf[BUFSIZE];
+		opl->update(buf, BUFSIZE);
+		
+		for (unsigned int buf_index = 0; buf_index < BUFSIZE; buf_index++) {
+			float sample = float(buf[buf_index]) / BIT16_TO_FLOAT;
+			p_buffer[buf_index] = AudioFrame(sample, sample);
 		}
-		for (int i = 0; i < towrite; i++) {
-			float sample = float(playback_data[playback_data_size-1-i]) / 32767.0;
-			p_buffer[i] = AudioFrame(sample, sample);
+		
+		if (towrite > BUFSIZE) {
+			towrite -= BUFSIZE;
 		}
-		if (playback_data_size <= p_frames) {
-			stop();
+		else {
+			towrite = RATE / playback->getrefresh();
+			if (!playback->update()) {
+				stop();
+				return 0;
+			}
 		}
-		playback_data.resize(playback_data_size-towrite);
-		return towrite;
+		return p_frames;
 	}
 }
 

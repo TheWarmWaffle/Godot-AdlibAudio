@@ -37,18 +37,13 @@ public:
 	void set_file_path(const String p_path);
 	String get_file_path();
 	
-	void reset();
-	void set_position(uint64_t pos);
 	virtual Ref<AudioStreamPlayback> instantiate_playback();
 	virtual String get_stream_name() const;
 
 	virtual double get_length() const { return 0; } // if supported, otherwise return 0
-	virtual bool can_be_sampled() const override {
-		return false;
-	}
+	virtual bool can_be_sampled() const override { return false; }
 	AudioStreamAdlib();
 private:
-	uint64_t pos;
 	int mix_rate;
 	int hz;
 	bool loop = false;

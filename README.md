@@ -4,9 +4,9 @@
 # Working verisons
 Godot: 4.4 Will not work for any Godot versions prior to 4.4.
 
-Adplug: 2.3.3.
+Adplug: 2.3.3. x64
 
-Libbinio: 1.5.
+Libbinio: 1.5. x64
 
 # Instructions
 Download the source code, place the adplug folder in your godot source folder, like this `godot/modules/adplug`.
