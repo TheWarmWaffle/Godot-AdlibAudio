@@ -27,7 +27,7 @@ String ResourceImporterAdplug::get_visible_name() const {
 }
 
 void ResourceImporterAdplug::get_recognized_extensions(List<String> *p_extensions) const {
-	std::array<String, 42> new_ext = {
+	String new_ext[] = {
 	"a2m",
 	"adl",
 	"agd",
@@ -77,11 +77,12 @@ void ResourceImporterAdplug::get_recognized_extensions(List<String> *p_extension
 	"xms",
 	"xsm"
 	};
-	for (int i = 0; i < new_ext.size(); i++) {
+	for (int i = 0; i < sizeof(new_ext)/sizeof(new_ext[0]); i++) {
 		if (!p_extensions->find(new_ext[i])) {
 			p_extensions->push_back(new_ext[i]);
 		}
 	}
+	// p_extensions->push_back("rad");
 }
 
 String ResourceImporterAdplug::get_save_extension() const {

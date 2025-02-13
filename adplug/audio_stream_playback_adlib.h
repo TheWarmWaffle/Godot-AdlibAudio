@@ -35,13 +35,16 @@ public:
 	
 	virtual double get_playback_position() const;
 	virtual void seek(double p_time);
+	AudioStreamPlaybackAdlib();
 	~AudioStreamPlaybackAdlib();
 private:
+	int _process(AudioFrame *p_buffer, unsigned int p_frames, unsigned int p_buffer_offset);
 	Ref<AudioStreamAdlib> base;
-	bool active;
+	bool active; // Is always true if memory has already been allocated for need objects and buffers, false otherwise.
 	
-	Copl *opl;
-	CPlayer* playback;
+	Copl *opl = nullptr;
+	CPlayer* playback = nullptr;
+	short* adplug_buffer = nullptr;
 	unsigned long towrite;
 
 	bool stereo = false;
